@@ -28,7 +28,7 @@
 namespace Phactor;
 
 /**
- * Class for working with asymmetric keypairs.
+ * Class for working with asymmetric keypairs in both hex and decimal forms.
  *
  * @author Rich Morgan <rich@bitpay.com>
  */
@@ -36,18 +36,18 @@ final class Key
 {
     use Point;
 
-    private $publicKey;
-    private $privateKey;
+    /**
+     * @var array
+     */
     private $keyInfo;
 
     /**
      * Public constructor class.
+     *
+     * @param array $parameters.
      */
     public function __construct(array $parameters = null)
     {
-        $this->publicKey  = '';
-        $this->privateKey = '';
-
         $this->keyInfo = array(
                                'private_key_hex'       => '',
                                'private_key_dec'       => '',
@@ -96,73 +96,47 @@ final class Key
     }
 
     /**
-     * Checks to see if a public key exists or not.
+     * Returns the private key value in hex or decimal.
      *
-     * @return bool The existence of a public key.
+     * @param  bool
+     * @return string
      */
-    public function PublicKeyExists()
+    public function getPrivateKey($hex = true)
     {
-        return !($this->publicKey == '');
-    }
-
-    /**
-     * Checks to see if a private key exists or not.
-     *
-     * @return bool The existence of a private key.
-     */
-    public function PrivateKeyExists()
-    {
-        return !($this->privateKey == '');
-    }
-
-    /**
-     * Returns the private key value or false on failure.
-     *
-     * @return string|bool
-     */
-    public function GetPrivateKey()
-    {
-        if ($this->PrivateKeyExists()) {
-            return $this->privateKey;
-        }
-
-        return false;
-    }
-
-    /**
-     * Returns the public key value or false on failure.
-     *
-     * @return string|false
-     */
-    public function GetPublicKey($format = 'compressed')
-    {
-        if ($this->PublicKeyExists()) {
-            if ($format == 'compressed') {
-                return $this->keyInfo['public_key_compressed'];
-            }
+        if ($hex === true) {
+            return $this->keyInfo['private_key_hex'];
         } else {
-            return $this->publicKey;
+            return $this->keyInfo['private_key_dec'];
         }
-
-        return false;
     }
 
     /**
-     * Returns the complete keypair info array or false on failure.
+     * Returns the compressed or uncompressed public key value.
      *
-     * @return string|false
+     * @param  string
+     * @return string
      */
-    public function KeypairInfo()
+    public function getPublicKey($format = 'compressed')
     {
-        if ($this->PrivateKeyExists()) {
-            return $this->keyInfo;
+        if ($format == 'compressed') {
+            return $this->keyInfo['public_key_compressed'];
+        } else {
+            return $this->keyInfo['public_key'];
         }
-
-        return false;
     }
 
     /**
-     * This is the main function for generating the new keypair.
+     * Returns the complete keypair info array.
+     *
+     * @return array
+     */
+    public function getKeypairInfo()
+    {
+        return $this->keyInfo;
+    }
+
+    /**
+     * This is the main function for generating a new keypair.
      *
      * @param  bool   $verbose Shows extra debugging output.
      * @return array  $keyInfo The complete keypair array.
@@ -172,7 +146,6 @@ final class Key
         $comp_prefix  = '';
 
         $point = $this->GenerateNewPoint();
-
 
         if (substr($point['Rx_hex'], 0, 2) == '0x') {
             $point['Rx_hex'] = substr($point['Rx_hex'], 2);
