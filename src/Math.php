@@ -49,13 +49,21 @@ trait Math
     public $Gx  = '0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798';
     public $Gy  = '0x483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8';
 
-    private $bytes     = '';
+    private $bytes     = array();
     private $math      = null;
     private $b58_chars = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
     private $dec_chars = '0123456789';
     private $hex_chars = '0123456789abcdef';
     private $bin_chars = '01';
 
+    /**
+     * Set this to false if you want to disable the
+     * various parameter checks to improve performance.
+     * It could definitely break things if you don't
+     * ensure the values are legitimate yourself, though!
+     *
+     * @var boolean
+     */
     private $param_checking = true;
 
     /**
@@ -69,8 +77,8 @@ trait Math
     public function Multiply($a, $b)
     {
         if ($this->param_checking == true) {
-            if (false === isset($a) || false === isset($b) || false === is_string($a) || false === is_string($b)) {
-                throw new \Exception('Empty or invalid parameters passed to Multiply() function.');
+            if ($this->numberCheck($a) === false || $this->numberCheck($b) === false) {
+                throw new \Exception('Empty or invalid parameters passed to Multiply() function.  Value received for first parameter was "' . var_export($a, true) . '" and second parameter was "' . var_export($b, true) . '".');
             }
         }
 
@@ -92,8 +100,8 @@ trait Math
     public function Add($a, $b)
     {
         if ($this->param_checking == true) {
-            if (false === isset($a) || false === isset($b) || false === is_string($a) || false === is_string($b)) {
-                throw new \Exception('Empty or invalid parameters passed to Add() function.');
+            if ($this->numberCheck($a) === false || $this->numberCheck($b) === false) {
+                throw new \Exception('Empty or invalid parameters passed to Add() function.  Value received for first parameter was "' . var_export($a, true) . '" and second parameter was "' . var_export($b, true) . '".');
             }
         }
 
@@ -115,8 +123,8 @@ trait Math
     public function Subtract($a, $b)
     {
         if ($this->param_checking == true) {
-            if (false === isset($a) || false === isset($b) || false === is_string($a) || false === is_string($b)) {
-                throw new \Exception('Empty or invalid parameters passed to Subtract() function.');
+            if ($this->numberCheck($a) === false || $this->numberCheck($b) === false) {
+                throw new \Exception('Empty or invalid parameters passed to Subtract() function.  Value received for first parameter was "' . var_export($a, true) . '" and second parameter was "' . var_export($b, true) . '".');
             }
         }
 
@@ -138,8 +146,8 @@ trait Math
     public function Divide($a, $b)
     {
         if ($this->param_checking == true) {
-            if (false === isset($a) || false === isset($b) || false === is_string($a) || false === is_string($b)) {
-                throw new \Exception('Empty or invalid parameters passed to Divide() function.');
+            if ($this->numberCheck($a) === false || $this->numberCheck($b) === false) {
+                throw new \Exception('Empty or invalid parameters passed to Divide() function.  Value received for first parameter was "' . var_export($a, true) . '" and second parameter was "' . var_export($b, true) . '".');
             }
         }
 
@@ -161,8 +169,8 @@ trait Math
     public function Modulo($a, $b)
     {
         if ($this->param_checking == true) {
-            if (false === isset($a) || false === isset($b) || false === is_string($a) || false === is_string($b)) {
-                throw new \Exception('Empty or invalid parameters passed to Modulo() function.');
+            if ($this->numberCheck($a) === false || $this->numberCheck($b) === false) {
+                throw new \Exception('Empty or invalid parameters passed to Modulo() function.  Value received for first parameter was "' . var_export($a, true) . '" and second parameter was "' . var_export($b, true) . '".');
             }
         }
 
@@ -184,8 +192,8 @@ trait Math
     public function Invert($a, $b)
     {
         if ($this->param_checking == true) {
-            if (false === isset($a) || false === isset($b) || false === is_string($a) || false === is_string($b)) {
-                throw new \Exception('Empty or invalid parameters passed to Invert() function.');
+            if ($this->numberCheck($a) === false || $this->numberCheck($b) === false) {
+                throw new \Exception('Empty or invalid parameters passed to Invert() function.  Value received for first parameter was "' . var_export($a, true) . '" and second parameter was "' . var_export($b, true) . '".');
             }
         }
 
@@ -207,8 +215,8 @@ trait Math
     public function Compare($a, $b)
     {
         if ($this->param_checking == true) {
-            if (false === isset($a) || false === isset($b) || false === is_string($a) || false === is_string($b)) {
-                throw new \Exception('Empty or invalid parameters passed to Compare() function.');
+            if ($this->numberCheck($a) === false || $this->numberCheck($b) === false) {
+                throw new \Exception('Empty or invalid parameters passed to Compare() function.  Value received for first parameter was "' . var_export($a, true) . '" and second parameter was "' . var_export($b, true) . '".');
             }
         }
 
@@ -230,8 +238,8 @@ trait Math
     public function Power($a, $b)
     {
         if ($this->param_checking == true) {
-            if (false === isset($a) || false === isset($b) || false === is_string($a) || false === is_string($b)) {
-                throw new \Exception('Empty or invalid parameters passed to Power() function.');
+            if ($this->numberCheck($a) === false || $this->numberCheck($b) === false) {
+                throw new \Exception('Empty or invalid parameters passed to Power() function.  Value received for first parameter was "' . var_export($a, true) . '" and second parameter was "' . var_export($b, true) . '".');
             }
         }
 
@@ -245,15 +253,16 @@ trait Math
     /**
      * Encodes a decimal value into hexadecimal.
      *
-     * @param  string     $dec
-     * @return string     $hex
+     * @param  string     $dec    The decimal value to convert.
+     * @param  boolean    $prefix Whether or not to append the '0x'.
+     * @return string     $hex    The result of the conversion.
      * @throws \Exception
      */
-    public function encodeHex($dec)
+    public function encodeHex($dec, $prefix = true)
     {
         if ($this->param_checking == true) {
-            if (false === isset($dec) || (false === is_string($dec) && false === ctype_digit($dec))) {
-                throw new \Exception('Empty or invalid decimal parameter passed to encodeHex function.');
+            if ($this->numberCheck($dec) === false) {
+                throw new \Exception('Empty or invalid decimal parameter passed to encodeHex function.  Value received was "' . var_export($dec, true) . '".');
             }
         }
 
@@ -261,17 +270,23 @@ trait Math
             $this->MathCheck();
         }
 
+        $dec = strtolower(trim($dec));
+
         if (substr($dec, 0, 1) == '-') {
             $dec = substr($dec, 1);
         }
 
-        if (substr($dec, 0, 2) == '0x') {
-            return $dec;
+        if ($this->Test($dec) == 'hex') {
+            if (substr($dec, 0, 2) != '0x') {
+                return '0x' . $dec;
+            } else {
+                return $dec;
+            }
         }
 
-        $hex = '';
-
         $digits = $this->hex_chars;
+
+        $hex = '';
 
         while ($this->math->comp($dec, '0') > 0) {
             $qq  = $this->math->div($dec, '16');
@@ -280,7 +295,13 @@ trait Math
             $hex = $hex . $digits[$rem];
         }
 
-        return '0x' . strrev($hex);
+        $hex = strrev($hex);
+
+        if ($prefix === true) {
+            return '0x' . $hex;
+        } else {
+            return $hex;
+        }
     }
 
     /**
@@ -293,8 +314,8 @@ trait Math
     public function decodeHex($hex)
     {
         if ($this->param_checking == true) {
-            if (false === isset($hex) || false === is_string($hex) || (false === ctype_xdigit($hex) && '0x' != substr($hex, 0, 2))) {
-                throw new \Exception('Argument must be a string of hex digits.');
+            if ($this->numberCheck($hex) === false) {
+                throw new \Exception('Argument must be a string of hex digits.  Value received was "' . var_export($hex, true) . '".');
             }
         }
 
@@ -304,6 +325,10 @@ trait Math
 
         $hex = strtolower(trim($hex));
 
+        if ($this->Test($hex) == 'dec') {
+            return $hex;
+        }
+
         if (substr($hex, 0, 2) == '0x') {
             $hex = substr($hex, 2);
         }
@@ -311,7 +336,7 @@ trait Math
         $hex_len = strlen($hex);
 
         for ($dec = '0', $i = 0; $i < $hex_len; $i++) {
-            $current = strpos($this->hex_chars, $hex[$i]);
+            $current = stripos($this->hex_chars, $hex[$i]);
             $dec     = $this->math->add($this->math->mul($dec, '16'), $current);
         }
 
@@ -330,7 +355,7 @@ trait Math
     {
         if ($this->param_checking == true) {
             if (false === isset($base) || true === empty($base)) {
-                throw new \Exception('Empty base parameter passed to BaseCheck() function.');
+                throw new \Exception('Empty base parameter passed to BaseCheck() function.  Value received was "' . var_export($base, true) . '".');
             }
         }
 
@@ -346,7 +371,7 @@ trait Math
             case '10':
                 return $this->dec_chars;
             default:
-                throw new \Exception('Unknown base parameter passed to BaseCheck() function.');
+                throw new \Exception('Unknown base parameter passed to BaseCheck() function.  Value received was "' . var_export($base, true) . '".');
         }
     }
 
@@ -361,8 +386,8 @@ trait Math
     public function D2B($num)
     {
         if ($this->param_checking == true) {
-            if (false === isset($num) || true === empty($num) || false === is_string($num)) {
-                throw new \Exception('Missing or invalid number parameter passed to the D2B() function.');
+            if ($this->numberCheck($num) === false) {
+                throw new \Exception('Missing or invalid number parameter passed to the D2B() function.  Value received was "' . var_export($num, true) . '".');
             }
         }
 
@@ -370,22 +395,23 @@ trait Math
             $this->MathCheck();
         }
 
-        if (substr($num, 0, 2) == '0x') {
+        $num = strtolower(trim($num));
+
+        if ($this->Test($num) == 'hex') {
             $num = $this->decodeHex($num);
         }
 
-        $tmp = $num;
-        $bin = '';
-
         try {
-            while ($this->math->comp($tmp, '0') > 0) {
-                if ($this->math->mod($tmp, '2') == '1') {
+            $bin = '';
+
+            while ($this->math->comp($num, '0') > 0) {
+                if ($this->math->mod($num, '2') == '1') {
                     $bin .= '1';
                 } else {
                     $bin .= '0';
                 }
 
-                $tmp = $this->math->div($tmp, '2');
+                $num = $this->math->div($num, '2');
             }
         } catch (\Exception $e) {
             throw $e;
@@ -397,33 +423,39 @@ trait Math
     /**
      * Converts hex value into octet (byte) string.
      *
-     * @param  string
+     * @param  string     $hex
      * @return string
      * @throws \Exception
      */
     public function binConv($hex)
     {
         if ($this->param_checking == true) {
-            if (false === isset($hex) || true === empty($hex) || false === is_string($hex)) {
-                throw new \Exception('Missing or invalid number parameter passed to the binConv() function.');
+            if ($this->numberCheck($hex) === false) {
+                throw new \Exception('Missing or invalid number parameter passed to the binConv() function.  Value received was "' . var_export($hex, true) . '".');
             }
         }
-
-        $rem    = '';
-        $dv     = '';
-        $byte   = '';
-
-        $digits = array();
 
         if ($this->math == null) {
             $this->MathCheck();
         }
 
-        $digits = $this->BaseCheck('256');
+        $hex     = strtolower(trim($hex));
+        $digits  = $this->BaseCheck('256');
 
-        if (substr(strtolower($hex), 0, 2) != '0x') {
-            $hex = '0x' . strtolower($hex);
+        switch ($this->Test($hex)) {
+            case 'dec':
+                $hex = $this->encodeHex($hex);
+                break;
+            case 'hex':
+                if ($hex[0] . $hex[1] != '0x') {
+                    $hex = '0x' . $hex;
+                }
+                break;
+            default:
+                throw new \Exception('Unknown data type passed to the binConv() function.  Value received was "' . var_export($hex, true) . '".');
         }
+
+        $byte = '';
 
         while ($this->math->comp($hex, '0') > 0) {
             $dv   = $this->math->div($hex, '256');
@@ -436,39 +468,130 @@ trait Math
     }
 
     /**
-     * Determines if the hex value needs '0x'.
+     * Determines the type of number passed to function.
      *
-     * @param  string     $value The value to check.
-     * @return string     $value If the value is present.
+     * @param  mixed      $value The value to check.
+     * @return string     $value The data type of the value.
      * @throws \Exception
      */
     public function Test($value)
     {
-        if (false === isset($value) || true === empty($value) || false === is_string($value)) {
-            throw new \Exception('Empty or non-string value parameter passed to Test() function.');
+        /* Let's get the non-numeric data types out of the way first... */
+        if (false === isset($value) || true === is_null($value)) {
+            return 'null';
         }
 
-        $value = strtolower(trim($value));
-
-        if (substr($value, 0, 2) != '0x' && ctype_xdigit($value) === false) {
-            throw new \Exception('Invalid value parameter passed to Test() function.');
+        /* Special case. */
+        if ($value == '0') {
+            return 'zer';
         }
 
-        return $value;
+        if (true === is_object($value)) {
+            return 'obj';
+        }
+
+        if (true === is_array($value)) {
+            return 'arr';
+        }
+
+        if (true === is_resource($value)) {
+            return 'res';
+        }
+
+        if (true === is_int($value)) {
+            return 'int';
+        }
+
+        if (true === is_float($value)) {
+            return 'flo';
+        }
+
+        /* This is what the data should be really. */
+        if (true === is_string($value)) {
+            $value = strtolower(trim($value));
+
+            if (substr($value, 0, 1) == '-') {
+                $value = substr($value, 1);
+            }
+
+            $h_prefix = false;
+            $h_digits = false;
+            $d_digits = false;
+            $b_digits = false;
+
+            /* Determine if we have a hex prefix to begin with. */
+            if (substr($value, 0, 2) == '0x') {
+                $h_prefix = true;
+                $value = substr($value, 2);
+            }
+
+            /* Both hex and regular decimal numbers will pass this check. */
+            if (preg_match('/^[a-f0-9]*$/', $value) == 1) {
+                $h_digits = true;
+            }
+
+            /* But, if this test is true, it's definitely a pure decimal number. */
+            if (preg_match('/^[0-9]*$/', $value) == 1) {
+                $d_digits = true;
+            }
+
+            /* Finally, if this test is true, it's definitely a pure binary number string. */
+            if (preg_match('/^[0-1]*$/', $value) == 1) {
+                $b_digits = true;
+            }
+
+            /* The first two cases are straightforward... */
+            if ($b_digits == true) {
+                return 'bin';
+            }
+
+            if ($d_digits == true) {
+                return 'dec';
+            }
+
+            /* Now we're probably dealing with a hex number. */
+            if ($h_digits == true) {
+                return 'hex';
+            }
+        }
+
+        /* Otherwise, this is either binary or garbage... */
+        return 'unk';
+    }
+
+    /**
+     * Check to ensure we're working with a number or numeric string.
+     *
+     * @param  mixed   $value The value to check.
+     * @return boolean        Whether or not this is a number.
+     */
+    public function numberCheck($value)
+    {
+        /* We are only concerned with these types... */
+        switch ($this->Test($value)) {
+            case 'hex':
+            case 'dec':
+            case 'bin':
+            case 'int':
+            case 'zer':
+                return true;
+            default:
+                return false;
+        }
     }
 
     /**
      * Generates a secure random number using the OpenSSL extension.
      *
-     * @param  int        Number of bytes to return.
-     * @return string     Random data in hex form.
+     * @param  int        $length Number of bytes to return.
+     * @return string             Random data in hex form.
      * @throws \Exception
      */
     public function SecureRandomNumber($length = 32)
     {
         $cstrong = false;
 
-        if (!function_exists('openssl_random_pseudo_bytes')) {
+        if (false === function_exists('openssl_random_pseudo_bytes')) {
             throw new \Exception('This class requires the OpenSSL extension for PHP. Please install this extension.');
         }
 
@@ -488,23 +611,32 @@ trait Math
      * @return string     $return
      * @throws \Exception
      */
-    private function encodeBase58($hex = '')
+    private function encodeBase58($hex)
     {
+        if ($this->param_checking == true) {
+            if ($this->numberCheck($hex) === false) {
+                throw new \Exception('Missing or invalid number parameter passed to the encodeBase58() function.  Value received was "' . var_export($hex, true) . '".');
+            }
+        }
+
         if ($this->math == null) {
             $this->MathCheck();
         }
 
+        $hex     = strtolower(trim($hex));
+
         try {
-            if (true === empty($hex) || strlen($hex) % 2 != 0) {
-                $return = 'Error - uneven number of hex characters passed to encodeBase58().';
+            if (strlen($hex) % 2 != 0 || $this->Test($hex) != 'hex') {
+                $return = 'Error - uneven number of hex characters passed to encodeBase58().  Value received was "' . var_export($hex, true) . '".';
             } else {
                 $chars   = $this->b58_chars;
                 $orighex = $hex;
-                $return  = '';
 
-                if (substr(strtolower($hex), 0, 2) != '0x') {
-                    $hex = '0x' . strtolower($hex);
+                if ($hex[0] . $hex[1] != '0x') {
+                    $hex = '0x' . $hex;
                 }
+
+                $return = '';
 
                 while ($this->math->comp($hex, '0') > 0) {
                     $dv     = $this->math->div($hex, '58');
@@ -558,7 +690,7 @@ trait Math
                 $this->math = new BC();
                 return;
             } else {
-                throw new \Exception('Both GMP and BC Math extensions are missing on this system. Please install one to use this class.');
+                throw new \Exception('Both GMP and BC Math extensions are missing on this system!  Please install one to use the Phactor math library.');
             }
         }
 
@@ -566,8 +698,13 @@ trait Math
             $this->bytes = $this->GenBytes();
         }
 
-        $this->Gx = '0x' . substr(strtolower($this->G), 2, 64);
-        $this->Gy = '0x' . substr(strtolower($this->G), 66, 64);
+        if ($this->Gx == '') {
+            $this->Gx = '0x' . substr(strtolower($this->G), 2, 64);
+        }
+
+        if ($this->Gx == '') {
+            $this->Gy = '0x' . substr(strtolower($this->G), 66, 64);
+        }
     }
 
     /**
@@ -580,14 +717,14 @@ trait Math
      */
     public function RangeCheck($value)
     {
-        if (false === isset($value) || true === empty($value)) {
-            throw new \Exception('Empty value parameter passed to RangeCheck() function.');
+        if ($this->numberCheck($value) === false) {
+            throw new \Exception('Empty value parameter passed to RangeCheck() function.  Value received was "' . var_export($value, true) . '".');
         }
 
         try {
             /* Check to see if $value is in the range [1, n-1] */
-            if ($this->math->comp($value, '1') <= 0 && $this->math->comp($value, $this->n) > 0) {
-                throw new \Exception('The coordinate value is out of range. Should be 1 < r < n-1.');
+            if ($this->math->comp($value, '0x01') <= 0 && $this->math->comp($value, $this->n) > 0) {
+                throw new \Exception('The coordinate value is out of range. Should be 1 < r < n-1.  Value checked was "' . var_export($value, true) . '".');
             }
         } catch (\Exception $e) {
             throw $e;
@@ -595,5 +732,4 @@ trait Math
 
         return true;
     }
-
 }

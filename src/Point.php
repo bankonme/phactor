@@ -118,11 +118,8 @@ trait Point
             $mm   = $this->Add($this->Multiply('3', $this->Multiply($P['x'], $P['x'])), $this->a);
             $oo   = $this->Multiply('2', $P['y']);
             $nn   = $this->Invert($oo, $this->p);
-            $n2   = $this->Modulo($oo, $this->p);
             $st   = $this->Multiply($mm, $nn);
-            $st2  = $this->Multiply($mm, $n2);
             $ss   = $this->Modulo($st, $this->p);
-            $s2   = $this->Modulo($st2, $this->p);
             $xmul = $this->Multiply('2', $P['x']);
             $smul = $this->Multiply($ss, $ss);
             $xsub = $this->Subtract($smul, $xmul);
@@ -148,8 +145,8 @@ trait Point
      * Performs a test of an EC point by substituting the new
      * values into the equation for the standard form of the curve.
      *
-     * @param  array $P   The generated point to test.
-     * @return bool       Whether or not the point is valid.
+     * @param  array|string $P   The generated point to test.
+     * @return bool              Whether or not the point is valid.
      * @throws \Exception
      */
     public function PointTest($P)
@@ -169,10 +166,10 @@ trait Point
         $right = '';
 
         try {
-            /* Left $y^2 term */
+            /* Left y^2 term */
             $y2 = $this->Multiply($P['y'], $P['y']);
 
-            /* Right, first $x^3 term */
+            /* Right, first x^3 term */
             $x3 = $this->Multiply($this->Multiply($P['x'], $P['x']), $P['x']);
 
             /* Right, second ax term */
@@ -202,7 +199,7 @@ trait Point
      */
     public function doubleAndAdd($x, $P)
     {
-        if (false === isset($P) || true === empty($P) || false == is_array($P)) {
+        if (false === isset($P) || true === empty($P) || false === is_array($P)) {
             throw new \Exception('You must provide a valid point to scale.');
         }
 
@@ -240,7 +237,7 @@ trait Point
      */
     public function mLadder($x, $P)
     {
-        if (false === isset($P) || true === empty($P) || false == is_array($P)) {
+        if (false === isset($P) || true === empty($P) || false === is_array($P)) {
             throw new \Exception('You must provide a valid point to scale.');
         }
 
@@ -271,12 +268,16 @@ trait Point
     /**
      * Creates a new point on the elliptic curve.
      *
+     * @param  boolean   $ladder Whether or not to use the mladder method.
      * @return array
      * @throws \Exception
      */
-    public function GenerateNewPoint($ladder=true)
+    public function GenerateNewPoint($ladder = true)
     {
-        $P = array('x' => strtolower(trim($this->Gx)), 'y' => strtolower(trim($this->Gy)));
+        $P = array(
+                   'x' => strtolower(trim($this->Gx)),
+                   'y' => strtolower(trim($this->Gy))
+                  );
 
         do {
             $random_number = $this->SecureRandomNumber();
@@ -295,6 +296,12 @@ trait Point
             throw new \Exception('Point test failed! Cannot continue. I got the point: ' . var_export($R, true));
         }
 
-        return array('random_number' => $random_number, 'R' => $R, 'Rx_hex' => $Rx_hex, 'Ry_hex' => $Ry_hex);
+        return array(
+                     'random_number' => $random_number,
+                     'R'             => $R,
+                     'Rx_hex'        => $Rx_hex,
+                     'Ry_hex'        => $Ry_hex
+                    );
+
     }
 }

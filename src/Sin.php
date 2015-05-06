@@ -47,7 +47,6 @@ final class Sin
      * Public constructor method.
      *
      * @param  string $pubkey
-     * @return string
      */
     public function __construct($pubkey = '')
     {
@@ -60,7 +59,7 @@ final class Sin
                                  'step6' => null,
                                 );
 
-        $this->encoded   = '';
+        $this->encoded = '';
 
         /*
          * Type-2 (ephemeral) SINs may be generated at any
@@ -98,8 +97,8 @@ final class Sin
     /**
      * Generates the SIN from the given public key.
      *
-     * @param string $pubkey The public key to encode.
-     * @return string        The encoded SIN string.
+     * @param  string $pubkey The public key to encode.
+     * @return string         The encoded SIN string.
      * @throws \Exception
      */
     public function Generate($pubkey)

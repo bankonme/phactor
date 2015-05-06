@@ -45,8 +45,8 @@ final class BC
     /**
      * Adds two arbitrary precision numbers.
      * 
-     * @param string $a  The first number.
-     * @param string $b  The second number.
+     * @param  string $a  The first number.
+     * @param  string $b  The second number.
      * @return string
      */
     public function add($a, $b)
@@ -60,8 +60,8 @@ final class BC
     /**
      * Multiplies two arbitrary precision numbers.
      * 
-     * @param string $a  The first number.
-     * @param string $b  The second number.
+     * @param  string $a  The first number.
+     * @param  string $b  The second number.
      * @return string
      */
     public function mul($a, $b)
@@ -75,8 +75,8 @@ final class BC
     /**
      * Divides two arbitrary precision numbers.
      * 
-     * @param string $a  The first number.
-     * @param string $b  The second number.
+     * @param  string $a  The first number.
+     * @param  string $b  The second number.
      * @return string
      */
     public function div($a, $b)
@@ -90,8 +90,8 @@ final class BC
     /**
      * Subtracts two arbitrary precision numbers.
      * 
-     * @param string $a  The first number.
-     * @param string $b  The second number.
+     * @param  string $a  The first number.
+     * @param  string $b  The second number.
      * @return string
      */
     public function sub($a, $b)
@@ -105,8 +105,8 @@ final class BC
     /**
      * Calculates the modulo 'b' of 'a'.
      * 
-     * @param string $a  The first number.
-     * @param string $b  The second number.
+     * @param  string $a  The first number.
+     * @param  string $b  The second number.
      * @return string
      */
     public function mod($a, $b)
@@ -120,8 +120,8 @@ final class BC
     /**
      * Compares two arbitrary precision numbers.
      * 
-     * @param string $a  The first number.
-     * @param string $b  The second number.
+     * @param  string $a  The first number.
+     * @param  string $b  The second number.
      * @return string
      */
     public function comp($a, $b)
@@ -135,8 +135,8 @@ final class BC
     /**
      * Raises $a to the power of $b.
      *
-     * @param string $a
-     * @param string $b
+     * @param  string $a
+     * @param  string $b
      * @return string
      */
     public function power($a, $b)
@@ -151,9 +151,9 @@ final class BC
      * Binary Calculator implementation of GMP's inverse
      * modulo function, where ax = 1(mod p).
      *
-     * @param  string $num The number to inverse modulo.
-     * @param  string $mod The modulus.
-     * @return string $a   The result.
+     * @param  string $number  The number to inverse modulo.
+     * @param  string $modulus The modulus.
+     * @return string $a       The result.
      * @throws \Exception
      */
     public function inv($number, $modulus)
@@ -217,11 +217,11 @@ final class BC
     private function coprime($a, $b)
     {
         if (false === isset($a) || true === empty($a)) {
-            throw new \Exception('Empty first number parameter passed to coprime() function.');
+            throw new \Exception('Empty first number parameter passed to coprime() function.  Value received was "' . var_export($a, true) . '".');
         }
 
         if (false === isset($b) || true === empty($b)) {
-            throw new \Exception('Empty second number parameter passed to coprime() function.');
+            throw new \Exception('Empty second number parameter passed to coprime() function.  Value received was "' . var_export($b, true) . '".');
         }
 
         $small = 0;
@@ -264,7 +264,7 @@ final class BC
     /**
      * BC doesn't like the '0x' hex prefix that GMP prefers.
      *
-     * @param unknown $a
+     * @param  string $a The value to normalize.
      * @return string
      */
     private function normalize($a)
